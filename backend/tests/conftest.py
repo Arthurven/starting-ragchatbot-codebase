@@ -159,6 +159,73 @@ def mock_anthropic_final_response():
 
 
 @pytest.fixture
+def mock_anthropic_outline_tool_use_response():
+    """Mock Anthropic API response requesting the get_course_outline tool"""
+    response = MagicMock()
+    response.stop_reason = "tool_use"
+
+    tool_block = MagicMock()
+    tool_block.type = "tool_use"
+    tool_block.name = "get_course_outline"
+    tool_block.id = "tool_use_outline_1"
+    tool_block.input = {"course_name": "Introduction to AI"}
+
+    response.content = [tool_block]
+    return response
+
+
+@pytest.fixture
+def make_tool_use_response():
+    """Factory fixture to create mock tool_use responses with configurable parameters"""
+    def _factory(tool_name, tool_id, tool_input):
+        response = MagicMock()
+        response.stop_reason = "tool_use"
+
+        tool_block = MagicMock()
+        tool_block.type = "tool_use"
+        tool_block.name = tool_name
+        tool_block.id = tool_id
+        tool_block.input = tool_input
+
+        response.content = [tool_block]
+        return response
+    return _factory
+
+
+@pytest.fixture
+def make_text_response():
+    """Factory fixture to create mock text responses"""
+    def _factory(text):
+        response = MagicMock()
+        response.stop_reason = "end_turn"
+
+        text_block = MagicMock()
+        text_block.type = "text"
+        text_block.text = text
+
+        response.content = [text_block]
+        return response
+    return _factory
+
+
+@pytest.fixture
+def mock_tool_manager():
+    """Mock ToolManager with default execute_tool return value"""
+    manager = MagicMock()
+    manager.execute_tool.return_value = "Default tool result"
+    return manager
+
+
+@pytest.fixture
+def sample_tools():
+    """Standard tools list for testing"""
+    return [
+        {"name": "search_course_content", "input_schema": {}},
+        {"name": "get_course_outline", "input_schema": {}}
+    ]
+
+
+@pytest.fixture
 def mock_anthropic_client(mock_anthropic_text_response):
     """Mock Anthropic client for testing"""
     client = MagicMock()
