@@ -7,6 +7,60 @@ let currentSessionId = null;
 // DOM elements
 let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton;
 
+// Theme toggle
+let themeToggle;
+
+function getEffectiveTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+    if (themeToggle) {
+        const label = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+        themeToggle.setAttribute('aria-label', label);
+        themeToggle.setAttribute('title', label);
+    }
+}
+
+function initTheme() {
+    themeToggle = document.getElementById('themeToggle');
+
+    // Apply the effective theme (inline script handles FOUC, this syncs aria-label)
+    applyTheme(getEffectiveTheme());
+
+    // Click handler
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Listen for OS preference changes (only applies when user hasn't explicitly chosen)
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            applyTheme(e.matches ? 'light' : 'dark');
+        }
+    });
+
+    // Keyboard shortcut: Ctrl/Cmd + Shift + L to toggle theme
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+            e.preventDefault();
+            toggleTheme();
+        }
+    });
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    localStorage.setItem('theme', next);
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements after page loads
@@ -17,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     courseTitles = document.getElementById('courseTitles');
     newChatButton = document.getElementById('newChatButton');
 
+    initTheme();
     setupEventListeners();
     createNewSession();
     loadCourseStats();
