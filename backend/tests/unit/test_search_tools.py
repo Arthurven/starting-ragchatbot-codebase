@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from search_tools import CourseSearchTool, CourseOutlineTool, ToolManager
 from vector_store import SearchResults
@@ -53,7 +53,9 @@ class TestCourseSearchToolDefinition:
 class TestCourseSearchToolExecute:
     """Test CourseSearchTool.execute() method"""
 
-    def test_execute_returns_formatted_results(self, mock_vector_store, valid_search_results):
+    def test_execute_returns_formatted_results(
+        self, mock_vector_store, valid_search_results
+    ):
         """Test execute returns properly formatted search results"""
         mock_vector_store.search.return_value = valid_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -63,7 +65,9 @@ class TestCourseSearchToolExecute:
         assert "[Introduction to AI" in result
         assert "machine learning fundamentals" in result
 
-    def test_execute_calls_vector_store_search(self, mock_vector_store, valid_search_results):
+    def test_execute_calls_vector_store_search(
+        self, mock_vector_store, valid_search_results
+    ):
         """Test execute calls vector store with correct parameters"""
         mock_vector_store.search.return_value = valid_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -71,12 +75,12 @@ class TestCourseSearchToolExecute:
         tool.execute(query="test query")
 
         mock_vector_store.search.assert_called_once_with(
-            query="test query",
-            course_name=None,
-            lesson_number=None
+            query="test query", course_name=None, lesson_number=None
         )
 
-    def test_execute_passes_course_name_filter(self, mock_vector_store, valid_search_results):
+    def test_execute_passes_course_name_filter(
+        self, mock_vector_store, valid_search_results
+    ):
         """Test execute passes course_name filter to vector store"""
         mock_vector_store.search.return_value = valid_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -84,12 +88,12 @@ class TestCourseSearchToolExecute:
         tool.execute(query="neural networks", course_name="AI Course")
 
         mock_vector_store.search.assert_called_once_with(
-            query="neural networks",
-            course_name="AI Course",
-            lesson_number=None
+            query="neural networks", course_name="AI Course", lesson_number=None
         )
 
-    def test_execute_passes_lesson_number_filter(self, mock_vector_store, valid_search_results):
+    def test_execute_passes_lesson_number_filter(
+        self, mock_vector_store, valid_search_results
+    ):
         """Test execute passes lesson_number filter to vector store"""
         mock_vector_store.search.return_value = valid_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -97,9 +101,7 @@ class TestCourseSearchToolExecute:
         tool.execute(query="transformers", lesson_number=3)
 
         mock_vector_store.search.assert_called_once_with(
-            query="transformers",
-            course_name=None,
-            lesson_number=3
+            query="transformers", course_name=None, lesson_number=3
         )
 
     def test_execute_passes_both_filters(self, mock_vector_store, valid_search_results):
@@ -110,12 +112,12 @@ class TestCourseSearchToolExecute:
         tool.execute(query="attention", course_name="ML Course", lesson_number=5)
 
         mock_vector_store.search.assert_called_once_with(
-            query="attention",
-            course_name="ML Course",
-            lesson_number=5
+            query="attention", course_name="ML Course", lesson_number=5
         )
 
-    def test_execute_handles_empty_results(self, mock_vector_store, empty_search_results):
+    def test_execute_handles_empty_results(
+        self, mock_vector_store, empty_search_results
+    ):
         """Test execute returns appropriate message for empty results"""
         mock_vector_store.search.return_value = empty_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -124,7 +126,9 @@ class TestCourseSearchToolExecute:
 
         assert "No relevant content found" in result
 
-    def test_execute_handles_empty_results_with_course_filter(self, mock_vector_store, empty_search_results):
+    def test_execute_handles_empty_results_with_course_filter(
+        self, mock_vector_store, empty_search_results
+    ):
         """Test empty results message includes course filter context"""
         mock_vector_store.search.return_value = empty_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -134,7 +138,9 @@ class TestCourseSearchToolExecute:
         assert "No relevant content found" in result
         assert "Test Course" in result
 
-    def test_execute_handles_empty_results_with_lesson_filter(self, mock_vector_store, empty_search_results):
+    def test_execute_handles_empty_results_with_lesson_filter(
+        self, mock_vector_store, empty_search_results
+    ):
         """Test empty results message includes lesson filter context"""
         mock_vector_store.search.return_value = empty_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -144,22 +150,24 @@ class TestCourseSearchToolExecute:
         assert "No relevant content found" in result
         assert "lesson 5" in result
 
-    def test_execute_handles_empty_results_with_both_filters(self, mock_vector_store, empty_search_results):
+    def test_execute_handles_empty_results_with_both_filters(
+        self, mock_vector_store, empty_search_results
+    ):
         """Test empty results message includes both filter contexts"""
         mock_vector_store.search.return_value = empty_search_results
         tool = CourseSearchTool(mock_vector_store)
 
         result = tool.execute(
-            query="nonexistent",
-            course_name="Test Course",
-            lesson_number=5
+            query="nonexistent", course_name="Test Course", lesson_number=5
         )
 
         assert "No relevant content found" in result
         assert "Test Course" in result
         assert "lesson 5" in result
 
-    def test_execute_handles_search_error(self, mock_vector_store, error_search_results):
+    def test_execute_handles_search_error(
+        self, mock_vector_store, error_search_results
+    ):
         """Test execute returns error message when search fails"""
         mock_vector_store.search.return_value = error_search_results
         tool = CourseSearchTool(mock_vector_store)
@@ -168,7 +176,9 @@ class TestCourseSearchToolExecute:
 
         assert "No course found matching" in result
 
-    def test_execute_populates_last_sources(self, mock_vector_store, valid_search_results):
+    def test_execute_populates_last_sources(
+        self, mock_vector_store, valid_search_results
+    ):
         """Test that last_sources is populated after search"""
         mock_vector_store.search.return_value = valid_search_results
         mock_vector_store.get_lesson_link.return_value = "https://example.com/lesson"
@@ -189,9 +199,9 @@ class TestCourseSearchToolExecute:
             metadata=[
                 {"course_title": "Same Course", "lesson_number": 1, "chunk_index": 0},
                 {"course_title": "Same Course", "lesson_number": 1, "chunk_index": 1},
-                {"course_title": "Same Course", "lesson_number": 2, "chunk_index": 2}
+                {"course_title": "Same Course", "lesson_number": 2, "chunk_index": 2},
             ],
-            distances=[0.1, 0.2, 0.3]
+            distances=[0.1, 0.2, 0.3],
         )
         mock_vector_store.search.return_value = duplicate_results
         mock_vector_store.get_lesson_link.return_value = "https://example.com/lesson"
@@ -206,7 +216,9 @@ class TestCourseSearchToolExecute:
 class TestCourseSearchToolFormatResults:
     """Test CourseSearchTool._format_results() method"""
 
-    def test_format_results_includes_course_header(self, mock_vector_store, single_result_search):
+    def test_format_results_includes_course_header(
+        self, mock_vector_store, single_result_search
+    ):
         """Test that formatted results include course title header"""
         mock_vector_store.search.return_value = single_result_search
         mock_vector_store.get_lesson_link.return_value = "https://example.com"
@@ -216,7 +228,9 @@ class TestCourseSearchToolFormatResults:
 
         assert "[Building Towards Computer Use" in result
 
-    def test_format_results_includes_lesson_number(self, mock_vector_store, single_result_search):
+    def test_format_results_includes_lesson_number(
+        self, mock_vector_store, single_result_search
+    ):
         """Test that formatted results include lesson number"""
         mock_vector_store.search.return_value = single_result_search
         mock_vector_store.get_lesson_link.return_value = "https://example.com"
@@ -226,7 +240,9 @@ class TestCourseSearchToolFormatResults:
 
         assert "Lesson 3" in result
 
-    def test_format_results_includes_content(self, mock_vector_store, single_result_search):
+    def test_format_results_includes_content(
+        self, mock_vector_store, single_result_search
+    ):
         """Test that formatted results include actual content"""
         mock_vector_store.search.return_value = single_result_search
         mock_vector_store.get_lesson_link.return_value = "https://example.com"

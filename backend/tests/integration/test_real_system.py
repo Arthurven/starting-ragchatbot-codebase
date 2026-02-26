@@ -4,7 +4,7 @@ import pytest
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from config import config
 from vector_store import VectorStore
@@ -20,13 +20,13 @@ class TestRealVectorStore:
         # Use the configured path
         chroma_path = config.CHROMA_PATH
         if not os.path.isabs(chroma_path):
-            backend_dir = os.path.join(os.path.dirname(__file__), '..', '..')
+            backend_dir = os.path.join(os.path.dirname(__file__), "..", "..")
             chroma_path = os.path.normpath(os.path.join(backend_dir, chroma_path))
 
         return VectorStore(
             chroma_path=chroma_path,
             embedding_model=config.EMBEDDING_MODEL,
-            max_results=config.MAX_RESULTS
+            max_results=config.MAX_RESULTS,
         )
 
     def test_database_has_courses(self, real_vector_store):
@@ -49,7 +49,7 @@ class TestRealVectorStore:
         try:
             # Try to get all documents from course_content collection
             results = real_vector_store.course_content.get()
-            doc_count = len(results.get('ids', []))
+            doc_count = len(results.get("ids", []))
 
             if doc_count == 0:
                 pytest.fail(
@@ -103,7 +103,9 @@ class TestRealVectorStore:
         # Try to resolve a partial course name
         first_course = courses[0]
         # Use just part of the name
-        partial_name = first_course.split()[0] if ' ' in first_course else first_course[:10]
+        partial_name = (
+            first_course.split()[0] if " " in first_course else first_course[:10]
+        )
 
         resolved = real_vector_store._resolve_course_name(partial_name)
 
@@ -122,13 +124,13 @@ class TestRealSearchPipeline:
         """Create a real CourseSearchTool with actual database"""
         chroma_path = config.CHROMA_PATH
         if not os.path.isabs(chroma_path):
-            backend_dir = os.path.join(os.path.dirname(__file__), '..', '..')
+            backend_dir = os.path.join(os.path.dirname(__file__), "..", "..")
             chroma_path = os.path.normpath(os.path.join(backend_dir, chroma_path))
 
         store = VectorStore(
             chroma_path=chroma_path,
             embedding_model=config.EMBEDDING_MODEL,
-            max_results=config.MAX_RESULTS
+            max_results=config.MAX_RESULTS,
         )
         return CourseSearchTool(store)
 
@@ -148,8 +150,9 @@ class TestRealSearchPipeline:
             )
 
         # Result should contain formatted content with headers
-        assert "[" in result or len(result) > 50, \
-            f"Result doesn't look like formatted content: {result[:100]}"
+        assert (
+            "[" in result or len(result) > 50
+        ), f"Result doesn't look like formatted content: {result[:100]}"
 
     def test_tool_execute_with_course_filter(self, real_search_tool):
         """Test tool execution with course name filter"""
@@ -162,13 +165,13 @@ class TestRealSearchPipeline:
         # Search within first course
         first_course = courses[0]
         result = real_search_tool.execute(
-            query="introduction",
-            course_name=first_course
+            query="introduction", course_name=first_course
         )
 
         # Should not return "No course found" since we used exact title
-        assert "No course found" not in result, \
-            f"Failed to find course '{first_course}' which should exist"
+        assert (
+            "No course found" not in result
+        ), f"Failed to find course '{first_course}' which should exist"
 
     def test_tool_captures_sources(self, real_search_tool):
         """Test that tool captures sources for citation"""
@@ -177,8 +180,9 @@ class TestRealSearchPipeline:
         if "No relevant content found" in result:
             pytest.skip("No content found - may need ingestion")
 
-        assert len(real_search_tool.last_sources) > 0, \
-            "Tool should capture sources for citation"
+        assert (
+            len(real_search_tool.last_sources) > 0
+        ), "Tool should capture sources for citation"
 
         for source in real_search_tool.last_sources:
             assert "text" in source, "Source should have 'text' field"
@@ -191,13 +195,13 @@ class TestDatabaseDiagnostics:
         """List all courses in database for diagnostic purposes"""
         chroma_path = config.CHROMA_PATH
         if not os.path.isabs(chroma_path):
-            backend_dir = os.path.join(os.path.dirname(__file__), '..', '..')
+            backend_dir = os.path.join(os.path.dirname(__file__), "..", "..")
             chroma_path = os.path.normpath(os.path.join(backend_dir, chroma_path))
 
         store = VectorStore(
             chroma_path=chroma_path,
             embedding_model=config.EMBEDDING_MODEL,
-            max_results=config.MAX_RESULTS
+            max_results=config.MAX_RESULTS,
         )
 
         courses = store.get_existing_course_titles()
@@ -235,19 +239,19 @@ class TestDatabaseDiagnostics:
         """Show sample content chunks for diagnostic purposes"""
         chroma_path = config.CHROMA_PATH
         if not os.path.isabs(chroma_path):
-            backend_dir = os.path.join(os.path.dirname(__file__), '..', '..')
+            backend_dir = os.path.join(os.path.dirname(__file__), "..", "..")
             chroma_path = os.path.normpath(os.path.join(backend_dir, chroma_path))
 
         store = VectorStore(
             chroma_path=chroma_path,
             embedding_model=config.EMBEDDING_MODEL,
-            max_results=5
+            max_results=5,
         )
 
         try:
             results = store.course_content.get(limit=5)
-            docs = results.get('documents', [])
-            metadatas = results.get('metadatas', [])
+            docs = results.get("documents", [])
+            metadatas = results.get("metadatas", [])
 
             print(f"\n{'='*60}")
             print("SAMPLE CONTENT CHUNKS")

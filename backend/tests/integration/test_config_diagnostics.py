@@ -4,7 +4,7 @@ import pytest
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from config import config
 
@@ -40,29 +40,35 @@ class TestConfigurationDiagnostics:
         # Check if it's an absolute path or relative
         if not os.path.isabs(chroma_path):
             # Convert to absolute path relative to backend directory
-            backend_dir = os.path.join(os.path.dirname(__file__), '..', '..')
+            backend_dir = os.path.join(os.path.dirname(__file__), "..", "..")
             chroma_path = os.path.normpath(os.path.join(backend_dir, chroma_path))
 
         # Check if directory exists or parent directory is writable
         if os.path.exists(chroma_path):
-            assert os.path.isdir(chroma_path), f"CHROMA_PATH exists but is not a directory: {chroma_path}"
+            assert os.path.isdir(
+                chroma_path
+            ), f"CHROMA_PATH exists but is not a directory: {chroma_path}"
         else:
             parent_dir = os.path.dirname(chroma_path)
             if parent_dir and not os.path.exists(parent_dir):
-                pytest.skip(f"Parent directory for CHROMA_PATH doesn't exist: {parent_dir}")
+                pytest.skip(
+                    f"Parent directory for CHROMA_PATH doesn't exist: {parent_dir}"
+                )
 
     def test_embedding_model_is_set(self):
         """Verify embedding model is configured"""
         assert config.EMBEDDING_MODEL, "EMBEDDING_MODEL should be set"
-        assert config.EMBEDDING_MODEL == "all-MiniLM-L6-v2", \
-            f"Expected embedding model 'all-MiniLM-L6-v2', got '{config.EMBEDDING_MODEL}'"
+        assert (
+            config.EMBEDDING_MODEL == "all-MiniLM-L6-v2"
+        ), f"Expected embedding model 'all-MiniLM-L6-v2', got '{config.EMBEDDING_MODEL}'"
 
     def test_chunk_settings_are_valid(self):
         """Verify chunk settings are reasonable"""
         assert config.CHUNK_SIZE > 0, "CHUNK_SIZE should be positive"
         assert config.CHUNK_OVERLAP >= 0, "CHUNK_OVERLAP should be non-negative"
-        assert config.CHUNK_OVERLAP < config.CHUNK_SIZE, \
-            "CHUNK_OVERLAP should be less than CHUNK_SIZE"
+        assert (
+            config.CHUNK_OVERLAP < config.CHUNK_SIZE
+        ), "CHUNK_OVERLAP should be less than CHUNK_SIZE"
 
     def test_max_results_is_valid(self):
         """Verify max results setting is reasonable"""
@@ -87,8 +93,7 @@ class TestChromaDBConnectivity:
             test_path = "/tmp/test_chroma_db_connectivity"
 
             client = chromadb.PersistentClient(
-                path=test_path,
-                settings=Settings(anonymized_telemetry=False)
+                path=test_path, settings=Settings(anonymized_telemetry=False)
             )
 
             # Try to create a collection
@@ -119,4 +124,6 @@ class TestEmbeddingModel:
             assert len(embedding) > 0
 
         except Exception as e:
-            pytest.fail(f"Failed to load embedding model '{config.EMBEDDING_MODEL}': {e}")
+            pytest.fail(
+                f"Failed to load embedding model '{config.EMBEDDING_MODEL}': {e}"
+            )
